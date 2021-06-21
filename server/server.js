@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require("path");
 // import ApolloServer
 const { ApolloServer } = require("apollo-server-express");
 const { authMiddleware } = require("./utils/auth");
@@ -25,6 +26,17 @@ server.applyMiddleware({ app });
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+
+// Serve up static assets, see if Node env is in production
+if (process.env.NODE_ENV === "production") {
+  // serve any files in build directory in client folder
+  app.use(express.static(path.join(__dirname, "../client/build")));
+}
+
+// wild GET route for server, no explicit route defined, respond with prod-ready React front-end code
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/build/index.html"));
+});
 
 // listen for connection, start server
 db.once('open', () => {
