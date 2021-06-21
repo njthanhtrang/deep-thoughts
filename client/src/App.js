@@ -12,8 +12,14 @@ import {
 
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import { BrowserRouter as Router, Route } from "react-router-dom";
 
 import Home from "./pages/Home";
+import Login from "./pages/Login";
+import NoMatch from "./pages/NoMatch";
+import SingleThought from "./pages/SingleThought";
+import Profile from "./pages/Profile";
+import Signup from "./pages/Signup";
 
 // establish new link to GraphQL server at /graphql endpoint
 const httpLink = createHttpLink({
@@ -34,13 +40,19 @@ function App() {
     // pass in client variable as value for client prop in provider
     // everything between ApolloProvider tags have access to server's API data through client
     <ApolloProvider client={client}>
+      <Router>
       <div className="flex-column justify-flex-start min-100-vh">
         <Header />
         <div className="container">
-          <Home />
+          <Route exact path="/" component={Home} />
+          <Route exact path="/login" component={Login} />
+          <Route exact path="/signup" component={Signup} />
+          <Route exact path="/profile" component={Profile} />
+          <Route exact path="/thought" component={SingleThought} />
         </div>
         <Footer />
       </div>
+      </Router>
     </ApolloProvider>
   );
 }
