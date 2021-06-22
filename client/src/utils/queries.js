@@ -85,7 +85,7 @@ export const QUERY_ME = gql`
   }
 `;
 
-// homepage
+// homepage, don't need to use word query in front bc we don't need to pass query variables
 export const QUERY_ME_BASIC = gql`
 {
     me {

@@ -2,9 +2,10 @@ import React from "react";
 // make requests to GraphQL server, from <ApolloProvider> in App.js
 import { useQuery } from "@apollo/client";
 import { QUERY_THOUGHTS, QUERY_ME_BASIC } from "../utils/queries";
+import ThoughtForm from "../components/ThoughtForm";
 import ThoughtList from "../components/ThoughtList";
-import Auth from "../utils/auth";
 import FriendList from "../components/FriendList";
+import Auth from "../utils/auth";
 
 const Home = () => {
   // use useQuery hook to make query request from apollo server
@@ -29,6 +30,11 @@ const Home = () => {
   return (
     <main>
       <div className="flex-row justify-space-between">
+        {loggedIn && (
+          <div className="col-12 mb-3">
+            <ThoughtForm />
+          </div>
+        )}
         {/* if user isn't logged in, span full width of row */}
         {/* if logged in, span 8 columns, leaving 4 column div on right side */}
         <div className={`col-12 mb-3 ${loggedIn && "col-lg-8"}`}>

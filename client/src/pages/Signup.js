@@ -21,8 +21,9 @@ const Signup = () => {
   };
 
   // Closure: executing a fx that scopes data to new fx and returns it to run at later time
-  // useMutation() creates and prepares JS fx that wraps around mutation code
+  // useMutation() creates and sets up JS fx that wraps around mutation code
   // returns in form of addUser fx, we also check for errors
+  // does NOT make request to server. if need immediately, useEffect Hook
   const [addUser, { error }] = useMutation(ADD_USER);
 
   // submit form, notice the async instead of .then() .catch() method chaining

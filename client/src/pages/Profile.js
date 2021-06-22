@@ -1,10 +1,12 @@
 import React from "react";
 // redirect user to another route within app, like location.replace() but doesn't reload browser
 import { Redirect, useParams } from "react-router-dom";
-import { useQuery } from "@apollo/client";
+import { useQuery, useMutation } from "@apollo/client";
 import { QUERY_USER, QUERY_ME } from "../utils/queries";
+import { ADD_FRIEND } from "../utils/mutations";
 import ThoughtList from "../components/ThoughtList";
 import FriendList from "../components/FriendList";
+import ThoughtForm from "../components/ThoughtForm";
 import Auth from "../utils/auth";
 
 const Profile = () => {
@@ -13,7 +15,7 @@ const Profile = () => {
 
   // if there's a value in userParam from URL, use value to run QUERY_USER
   // if no value in userParam, visit /profile as logged in user and execute QUERY_ME
-  const { loading, data } = useQuery(userParam ? QUERY_USER: QUERY_ME, {
+  const { loading, data } = useQuery(userParam ? QUERY_USER : QUERY_ME, {
     variables: { username: userParam },
   });
 
@@ -21,6 +23,8 @@ const Profile = () => {
   // if run QUERY_ME, response returns data in "me" prop
   // if QUERY_USER, returns data in "user" prop
   const user = data?.me || data?.user || {};
+
+  const [addFriend] = useMutation(ADD_FRIEND);
 
   // redirect to personal profile page if username is logged-in user's
   // check if user is logged in and if so, if username stored in JWT is same as userParam
@@ -37,10 +41,23 @@ const Profile = () => {
   if (!user?.username) {
     return (
       <h4>
-        You need to be logged in to see this page. Use the navigation links above to sign up or log in!
+        You need to be logged in to see this page. Use the navigation links
+        above to sign up or log in!
       </h4>
     );
   }
+
+  const handleClick = async () => {
+    try {
+      // addFriend() returns updated user obj whose ID matches me obj stored in cache
+      // when cache is updated, useQuery(QUERY_ME_BASIC) Hook on homepage causes rerender
+      await addFriend({
+        variables: { id: user._id },
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   return (
     <div>
@@ -50,6 +67,13 @@ const Profile = () => {
           {/* otherwise, display username of other user */}
           Viewing {userParam ? `${user.username}'s` : "your"} profile.
         </h2>
+        {/* userParam only defined when route includes username e.g. /profile/Marisa86 */}
+        {/* button won't display when route is /profile */}
+        {userParam && (
+          <button className="btn ml-auto" onClick={handleClick}>
+            Add Friend
+          </button>
+        )}
       </div>
 
       <div className="flex-row justify-space-between mb-3">
@@ -68,6 +92,8 @@ const Profile = () => {
           />
         </div>
       </div>
+      {/* make sure form only dispalys on user's own Profile page, not other users' */}
+      <div>{!userParam && <ThoughtForm />}</div>
     </div>
   );
 };
