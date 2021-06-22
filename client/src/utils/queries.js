@@ -56,3 +56,47 @@ export const QUERY_USER = gql`
     }
   }
 `;
+
+// personal profile page
+export const QUERY_ME = gql`
+  {
+    me {
+      _id
+      username
+      email
+      friendCount
+      thoughts {
+        _id
+        thoughtText
+        createdAt
+        reactionCount
+        reactions {
+          _id
+          createdAt
+          reactionBody
+          username
+        }
+      }
+      friends {
+        _id
+        username
+      }
+    }
+  }
+`;
+
+// homepage
+export const QUERY_ME_BASIC = gql`
+{
+    me {
+        _id
+        username
+        email
+        friendCount
+        friends {
+            _id
+            username
+        }
+    }
+}
+`;

@@ -9,6 +9,8 @@ import {
   InMemoryCache,
   createHttpLink,
 } from "@apollo/client";
+// retrieve token from localStorage and include with each request to API
+import { setContext } from "@apollo/client/link/context";
 
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -28,9 +30,25 @@ const httpLink = createHttpLink({
   uri: "/graphql",
 });
 
+// omit first param (current request obj) in case fx is running after we've initiated request
+const authLink = setContext((_, { headers }) => {
+  // retrieve token from localStorage
+  const token = localStorage.getItem("id_token");
+  return {
+    // set HTTP request headers of every request to include token
+    // whether request needs or not, if doesn't need token, server-side resolver won't check for it
+    headers: {
+      ...headers,
+      authorization: token ? `Bearer ${token}` : "",
+    },
+  };
+});
+
 // instantiate ApolloClient instance, create connection to API endpoint
 const client = new ApolloClient({
-  link: httpLink,
+  // combine authLink and httpLink obj so
+  // every request retrieves token and sets request headers before making request to API
+  link: authLink.concat(httpLink),
   // instantiate new cache obj
   cache: new InMemoryCache(),
 });
