@@ -1,8 +1,37 @@
 import React, { useState } from "react";
+import { useMutation } from "@apollo/client";
+import { ADD_THOUGHT } from "../../utils/mutations";
+import { QUERY_THOUGHTS, QUERY_ME } from "../../utils/queries";
 
 const ThoughtForm = () => {
   const [thoughtText, setText] = useState("");
   const [characterCount, setCharacterCount] = useState(0);
+
+  const [addThought, { error }] = useMutation(ADD_THOUGHT, {
+    //   addThought is newly created thought
+    update(cache, { data: { addThought } }) {
+      try {
+        // could potentially not exist yet, so wrap in try...catch
+        //   read what's currently in the QUERY_THOUGHTS cache
+        const { thoughts } = cache.readQuery({ query: QUERY_THOUGHTS });
+
+        // prepend and update newest thought to front of array
+        cache.writeQuery({
+          query: QUERY_THOUGHTS,
+          data: { thoughts: [addThought, ...thoughts] },
+        });
+      } catch (e) {
+        console.error(e);
+      }
+
+      // update ME obj's cache, appending new thought to end of array
+      const { me } = cache.readQuery({ query: QUERY_ME });
+      cache.writeQuery({
+        query: QUERY_ME,
+        data: { me: { ...me, thoughts: [...me.thoughts, addThought] } },
+      });
+    },
+  });
 
   const handleChange = (event) => {
     if (event.target.value.length <= 280) {
@@ -13,14 +42,28 @@ const ThoughtForm = () => {
 
   const handleFormSubmit = async (event) => {
     event.preventDefault();
-    setText("");
-    setCharacterCount(0);
+
+    try {
+      // add thought to DB
+      await addThought({
+        variables: { thoughtText },
+      });
+
+      // clear form value
+      setText("");
+      setCharacterCount(0);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   return (
     <div>
-      <p className={`m-0 ${characterCount === 280 ? "text-error" : ""}`}>
+      <p
+        className={`m-0 ${characterCount === 280 || error ? "text-error" : ""}`}
+      >
         Character Count: {characterCount}/280
+        {error && <span className="ml-2">Something went wrong...</span>}
       </p>
       <form
         className="flex-row justify-center justify-space-between-md align-stretch"
@@ -41,3 +84,5 @@ const ThoughtForm = () => {
 };
 
 export default ThoughtForm;
+
+// Because the ThoughtForm and ReactionForm components are so similar, you could combine them into a more generic Form component to make your code more DRY. Doing so would involve passing in a few more props, though. For example, one prop could be a callback function that runs the necessary mutation. That way, the Form component itself wouldn't need to import useMutation. It would be part of the parent component and used in the callback.
