@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 // Heroku won't let us use CRA default port of 3000
 // don't want to run nodemon or CRA bc neither codebase dynamically changes once deployed
 // we only need static Node.js server that serves built/compiled front-end files
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/deep-thoughts', {
+mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://njthanhtrang:Noriega1!@cluster0.bce0h.mongodb.net/deep_thoughts?', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useCreateIndex: true,
